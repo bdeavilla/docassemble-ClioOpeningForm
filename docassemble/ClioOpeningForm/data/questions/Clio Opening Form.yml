@@ -17,6 +17,8 @@ fields:
   - First name: contact[i].name.first
   - Last name: contact[i].name.last
   - Relation: contact[i].relation
+  - Email: contact[i].email
+  - Phone Number: contact[i].phone
   - Street: contact[i].address.street
   - City/Town: contact[i].address.citytown
   - State: contact[i].address.state
@@ -299,13 +301,66 @@ attachment:
 #Opposing Party Information
 #Relevant Contact
     - contact.Name: |
-        ${ }
+        ${ contact[0].name }
     - contact.Relation: |
+        ${ contact[0].relation }
     - contact.email: |
+        ${ contact[0].email }
     - contact.phone: |
+        ${ contact[0].phone }
     - contact.address: |
+        ${ contact[0].address.street }
     - contact.citytown: |
+        ${ contact[0].address.citytown },${ contact[0].address.state } ${ contact[0].address.zipcode }
 #Relevant Contact 2
+    - contact2.Name: |
+        ${ contact[1].name }
+    - contact2.Relation: |
+        ${ contact[1].relation }
+    - contact2.email: |
+        ${ contact[1].email }
+    - contact2.phone: |
+        ${ contact[1].phone }
+    - contact2.address: |
+        ${ contact[1].address.street }
+    - contact2.citytown: |
+        ${ contact[1].address.citytown }
+    - contact2.state: |
+        ${ contact[1].address.state } 
+    - contact2.zipcode: |
+        ${ contact[1].address.zipcode }
 #Relevant Contact 3
+    - contact3.Name: |
+        ${ contact[2].name }
+    - contact3.Relation: |
+        ${ contact[2].relation }
+    - contact3.email: |
+        ${ contact[2].email }
+    - contact3.phone: |
+        ${ contact[2].phone }
+    - contact3.address: |
+        ${ contact[2].address.street }
+    - contact3.citytown: |
+        ${ contact[2].address.citytown }
+    - contact3.state: |
+        ${ contact[2].address.state } 
+    - contact3.zipcode: |
+        ${ contact[2].address.zipcode }
 #Relevant Contact 4
+    - contact4.Name: |
+        ${ contact[3].name }
+    - contact4.Relation: |
+        ${ contact[3].relation }
+    - contact4.email: |
+        ${ contact[3].email }
+    - contact4.phone: |
+        ${ contact[3].phone }
+    - contact4.address: |
+        ${ contact[3].address.street }
+    - contact4.citytown: |
+        ${ contact[3].address.citytown }
+    - contact4.state: |
+        ${ contact[3].address.state } 
+    - contact4.zipcode: |
+        ${ contact[3].address.zipcode }
 Mandatory: True
