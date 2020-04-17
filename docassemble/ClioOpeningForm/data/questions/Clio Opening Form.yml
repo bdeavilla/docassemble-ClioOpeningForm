@@ -1,8 +1,23 @@
 # Use this for the Clinical Opening form #
-
+metadata:
+  title: Clinical Case Opening Form
+  short title: Case Opening Form
+  comment: Opening form for clinical programs
+  logo: |
+    <img src="/packagestatic/docassemble.finalproject/suffolk-logo-boston.svg" style="max-height:1.9em;"/> <h3>Clinical Programs</h3>
+---
+features:
+  # This moves the "help" and "back" button next to the Continue button
+  # question help button: True
+  question back button: True
+  # One way to customize appearance is with a Bootstrap theme
+  # Try linking one from https://www.bootstrapcdn.com/bootswatch/
+  # Or generate your own via https://pikock.github.io/bootstrap-magic/app/index.html#!/editor
+ # bootstrap theme: https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/cosmo/bootstrap.min.css
+  bootstrap theme: https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/darkly/bootstrap.min.css
 ---
 question: |
-  Are there any relevant contact for this client (e.g. family, witnesses, etc.)?
+  [BR] Would you like to add any relevant contacts for ${ client.name } (e.g. family, witnesses, etc.)?
 fields:
   - no label: contact.there_are_any
     datatype: yesnoradio
@@ -12,17 +27,21 @@ fields:
     show if: contact.there_are_any
 ---
 question: |
-  Please enter the ${ordinal(i)} relevant contact's information below?
+  [BR] Please enter the ${ordinal(i)} relevant contact's information below?
 fields:
   - First name: contact[i].name.first
   - Last name: contact[i].name.last
   - Relation: contact[i].relation
   - Email: contact[i].email
+    datatype: email
+    required: False
   - Phone Number: contact[i].phone
-  - Street: contact[i].address.street
-  - City/Town: contact[i].address.citytown
+  - Street: contact[i].address.address
+    address autocomplete: True
+  - City/Town: contact[i].address.city
   - State: contact[i].address.state
-  - Zip Code: contact[i].address.zipcode
+    code: states_list()
+  - Zip Code: contact[i].address.zip
 ---
 objects:
   - studentattorney: Individual
@@ -39,22 +58,49 @@ code: |
   studentattorney.name.first
   client.name.first
   client.race
+  conflict_complete
+  supervisor_signature
   if client.age_in_years() >= 18:
     client.income
+  else: 
+    client.income = "N/A" 
+    client.incomesource = "N/A"
+    client.householdsize = "1"
+    client.dependants = "0"
   if opp_party:
     opp.name.first
+  else:
+    opp.name.first = ""
+    opp.name.last = ""
+    opp.gender = ""
+    opp.dob = ""
+    opp.title = ""
+    opp.company = ""
+    opp.aliases = ""
+    opp.address.address = ""
+    opp.address.city = ""
+    opp.address.zip = ""
+    opp.phone = ""
+    opp.alternative = ""
+    opp.interpretor = ""
+    opp.language = ""
+    opp.email = ""
+    opp.notes = ""
   contact.gather()
 ---
 question: |
-  Welcome to the interview!
+  [BR] Suffolk University Law School
+subquestion: |
+  This is the Case Opening form for the Clinical Programs at Suffolk University
 field: welcome
 ---
 question: |
-  Student Attorney Information
+  [BR] Student Attorney Information
 fields: 
   - First name: studentattorney.name.first
   - Last name: studentattorney.name.last
   - Email: studentattorney.email
+    datatype: email
   - Clinic/Practice Area: studentattorney.practice
     datatype: dropdown
     choices:
@@ -70,7 +116,7 @@ fields:
   - Supervisor Name: studentattorney.supervisor
 ---
 question: |
-  Matter Information
+  [BR] Matter Information
 fields: 
   - Judge / ALJ: judge
   - Court / Agency: courthouse
@@ -91,7 +137,7 @@ fields:
 
 ---
 question: |
-  Client Contact Information
+  [BR] Client Contact Information
 fields:
   - First name: client.name.first
   - Last name: client.name.last
@@ -103,19 +149,44 @@ fields:
     required: False
   - Date of Birth: client.birthdate
     datatype: date
-  - Street: client.address.street
-  - City/Town: client.address.citytown
+  - Street: client.address.address
+    address autocomplete: True
+  - City/Town: client.address.city
   - State: client.address.state
-  - Zip Code: client.address.zipcode
+    code: states_list()
+  - Zip Code: client.address.zip
   - Phone Number: client.phone
   - Alternative Number: client.alternative
     required: False
   - Email Address: client.email
+    datatype: email
     required: False
-
+  - Is this a criminal/delinquent matter?: opp_party
+    datatype: noyesradio
 ---
 question: |
-  Client Demographic Information
+  [BR] Conflict Check (Must be completed before case will be opened)
+fields:
+  - Did you complete the Conflict Check?: conflict_complete
+    datatype: yesnoradio
+  - Were any Conflicts discovered?: conflicts_exist
+    datatype: yesnoradio
+  - Please describe the potential conflicts: conflict_description
+    input type: area
+    show if: conflicts_exist
+---
+question: |
+  [BR] Please sign your name below to approve the case to be opened.
+signature: supervisor_signature
+under: |
+  ${ studentattorney.supervisor }
+
+---
+code: |
+  case_approval = True
+---
+question: |
+  [BR] Client Demographic Information
 fields:
   - Race/Ethnicity: client.race
     datatype: dropdown
@@ -138,6 +209,20 @@ fields:
        - Other
        - Unknown
   - Primary Language(s): client.language
+    datatype: dropdown
+    choices:
+        - English
+        - Spanish
+        - French
+        - Haitian Creole
+        - Portuguese
+        - Mandarin
+        - Cantonese
+        - Other
+  - Which language do you speak?: client.language
+    show if: 
+      variable: client.language
+      is: Other
   - Interpretor needed?: client.interpretor
     datatype: yesnoradio 
   - Marital Status: client.marital
@@ -157,7 +242,7 @@ fields:
     input type: area
 ---
 question: |
-  Client Household Information
+  [BR] Client Household Information
 fields:
   - Household Monthly Income: client.income
     datatype: currency
@@ -166,21 +251,13 @@ fields:
   - Number of People in Household (include client): client.householdsize
     datatype: integer
     min: 1
-  - Number of Dependants (include client): client.dependants
+  - Number of Dependants: client.dependants
     datatype: integer
-    min: 1
-    
-# Conflict Check
+    min: 0
 
 ---
 question: |
-  Is there an Opposing Party? (select 'No' if is a criminal matter)
-yesno: opp_party
-
-# Add Commonwealth of Massachusetts as an option
----
-question: |
-  Opposing Party Contact Information
+  [BR] Opposing Party Contact Information
 fields:
   - First name: opp.name.first
   - Last name: opp.name.last
@@ -190,16 +267,19 @@ fields:
     required: False
   - Known Aliases: opp.aliases
     required: False
-  - Date of Birth: opp.birthdate
+  - Date of Birth: opp.dob
     datatype: date
-  - Street: opp.address.street
-  - City/Town: opp.address.citytown
+  - Street: opp.address.address
+    address autocomplete: True
+  - City/Town: opp.address.city
   - State: opp.address.state
-  - Zip Code: opp.address.zipcode
+    code: states_list()
+  - Zip Code: opp.address.zip
   - Phone Number: opp.phone
   - Alternative Number: opp.alternative
     required: False
   - Email Address: opp.email
+    datatype: email
     required: False
   - Gender: opp.gender
     datatype: dropdown
@@ -211,19 +291,33 @@ fields:
        - Other
        - Unknown
   - Primary Language(s): opp.language
+    datatype: dropdown
+    choices:
+        - English
+        - Spanish
+        - French
+        - Haitian Creole
+        - Portuguese
+        - Mandarin
+        - Cantonese
+        - Other
+  - Which language do you speak?: opp.language
+    show if: 
+      variable: opp.language
+      is: Other
   - Interpretor needed?: opp.interpretor
     datatype: yesnoradio 
-  - Additional Notes: client.notes
+  - Additional Notes: opp.notes
     required: False
     input type: area
 ---
 question: |
-  Here is your Case Opening Packet
+  [BR] Here is your Case Opening Packet
 mandatory: True
 attachment:
   name: Case Opening ${ client.name }
   filename: Case Opening ${ client.name }
-  pdf template file: Clinic_Wide_Case_Opening_Form_REDONE.pdf
+  pdf template file: Clinic_Wide_Case_Opening_Form_REDONE2.pdf
   fields:
     - todays.date: |
         ${ today() }
@@ -234,6 +328,17 @@ attachment:
         ${ studentattorney.practice }
     - supervisor.name: |
         ${ studentattorney.supervisor }
+#Conflict Check
+    - ConflictComplete: |
+        ${ conflict_complete }
+    - conflictdate: |
+        ${ format_date(today(), format='short') }
+    - conflict.description: |
+        ${ conflict_description }
+    - caseapproval: |
+        ${ case_approval }
+    - supervisor.signature: |
+        ${ supervisor_signature }
 #Matter Info
     - Judge: |
         ${ judge }
@@ -261,11 +366,11 @@ attachment:
     - Known Aliases: |
         ${ client.aliases }
     - client.Street Address: |
-        ${ client.address.street }
+        ${ client.address.address }
     - client.CityTown: |
-        ${ client.address.citytown }
+        ${ client.address.city }
     - client.Zip Code: |
-        ${ client.address.zipcode }
+        ${ client.address.zip }
     - client.Phone: |
         ${ client.phone }
     - client.Alternative: |
@@ -279,8 +384,7 @@ attachment:
         ${ client.gender }
     - client.Race/Ethnicity: |
         ${ client.race }
-#Not filling in on template
-    - "client.Primary Language": |
+    - client.Primary Languages: |
         ${ client.language }
     - client.Interpretor: |
         ${ client.interpretor }
@@ -295,72 +399,101 @@ attachment:
         ${ client.incomesource }
     - client.Number of People in Household: |
         ${ client.householdsize }
-#Not filling in on template
-    - client.Number of Dependants: |
+    - client.Number of Dependents: |
         ${ client.dependants } 
 #Opposing Party Information
+    - opp.name: |
+        ${ opp.name }
+    - opp.gender: |
+        ${ opp.gender }
+    - opp.dob: |
+        ${ opp.dob.format("MM/dd/yyyy") }
+    - opp.Title: |
+        ${ opp.title }
+    - opp.Company: |
+        ${ opp.company }
+    - opp.Aliases: |
+        ${ opp.aliases }
+    - opp.Street Address: |
+        ${ opp.address.address }
+    - opp.CityTown: |
+        ${ opp.address.city }
+    - opp.Zip Code: |
+        ${ opp.address.zip }
+    - opp.Phone: |
+        ${ opp.phone }
+    - opp.Alternative: |
+        ${ opp.alternative }
+    - opp.interpreter: |
+        ${ opp.interpretor }
+    - opp.Primary Languages: |
+        ${ opp.language }
+    - opp.Email: |
+        ${ opp.email }
+    - opp.Notes: |
+        ${ opp.notes }
 #Relevant Contact
     - contact.Name: |
-        ${ contact[0].name }
+        ${ contact.item(0).name }
     - contact.Relation: |
-        ${ contact[0].relation }
+        ${ contact.item(0).relation }
     - contact.email: |
-        ${ contact[0].email }
+        ${ contact.item(0).email }
     - contact.phone: |
-        ${ contact[0].phone }
+        ${ contact.item(0).phone }
     - contact.address: |
-        ${ contact[0].address.street }
+        ${ contact.item(0).address.address }
     - contact.citytown: |
-        ${ contact[0].address.citytown },${ contact[0].address.state } ${ contact[0].address.zipcode }
+        ${ contact.item(0).address.city },${ contact.item(0).address.state } ${ contact.item(0).address.zip }
 #Relevant Contact 2
     - contact2.Name: |
-        ${ contact[1].name }
+        ${ contact.item(1).name }
     - contact2.Relation: |
-        ${ contact[1].relation }
+        ${ contact.item(1).relation }
     - contact2.email: |
-        ${ contact[1].email }
+        ${ contact.item(1).email }
     - contact2.phone: |
-        ${ contact[1].phone }
+        ${ contact.item(1).phone }
     - contact2.address: |
-        ${ contact[1].address.street }
+        ${ contact.item(1).address.address }
     - contact2.citytown: |
-        ${ contact[1].address.citytown }
+        ${ contact.item(1).address.city }
     - contact2.state: |
-        ${ contact[1].address.state } 
+        ${ contact.item(1).address.state } 
     - contact2.zipcode: |
-        ${ contact[1].address.zipcode }
+        ${ contact.item(1).address.zip }
 #Relevant Contact 3
     - contact3.Name: |
-        ${ contact[2].name }
+        ${ contact.item(2).name }
     - contact3.Relation: |
-        ${ contact[2].relation }
+        ${ contact.item(2).relation }
     - contact3.email: |
-        ${ contact[2].email }
+        ${ contact.item(2).email }
     - contact3.phone: |
-        ${ contact[2].phone }
+        ${ contact.item(2).phone }
     - contact3.address: |
-        ${ contact[2].address.street }
+        ${ contact.item(2).address.address }
     - contact3.citytown: |
-        ${ contact[2].address.citytown }
+        ${ contact.item(2).address.city }
     - contact3.state: |
-        ${ contact[2].address.state } 
+        ${ contact.item(2).address.state } 
     - contact3.zipcode: |
-        ${ contact[2].address.zipcode }
+        ${ contact.item(2).address.zip }
 #Relevant Contact 4
     - contact4.Name: |
-        ${ contact[3].name }
+        ${ contact.item(3).name }
     - contact4.Relation: |
-        ${ contact[3].relation }
+        ${ contact.item(3).relation }
     - contact4.email: |
-        ${ contact[3].email }
+        ${ contact.item(3).email }
     - contact4.phone: |
-        ${ contact[3].phone }
+        ${ contact.item(3).phone }
     - contact4.address: |
-        ${ contact[3].address.street }
+        ${ contact.item(3).address.address }
     - contact4.citytown: |
-        ${ contact[3].address.citytown }
+        ${ contact.item(3).address.city }
     - contact4.state: |
-        ${ contact[3].address.state } 
+        ${ contact.item(3).address.state } 
     - contact4.zipcode: |
-        ${ contact[3].address.zipcode }
+        ${ contact.item(3).address.zip }
 Mandatory: True
