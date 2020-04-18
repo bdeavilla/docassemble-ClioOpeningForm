@@ -43,7 +43,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.ClioOpeningForm',
-      version='0.1',
+      version='0.25',
       description=('Case opening forms for Clio integration'),
       long_description='This is an interview project for the Clio Opening Form for Suffolk University Law School Clinical Programs',
       long_description_content_type='text/markdown',
