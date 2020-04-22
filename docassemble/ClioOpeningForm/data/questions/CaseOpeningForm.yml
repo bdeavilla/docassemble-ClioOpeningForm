@@ -70,6 +70,29 @@ code: |
   else:
     supervisor_signature = ""
     case_approval = False
+  if case_approval:
+    if studentattorney.practice == 'Juvenile Defenders':
+      admin_cc = ""
+      # mguirand@suffolk.edu
+    if studentattorney.practice == 'Accelerator Practice':
+      admin_cc = ""
+    if studentattorney.practice == 'Defenders':
+      admin_cc = ""
+      # mguirand@suffolk.edu
+    if studentattorney.practice == 'Family Advocacy':
+      admin_cc = ""
+    if studentattorney.practice == 'Health Law':
+      admin_cc = ""
+    if studentattorney.practice == 'Immigration':
+      admin_cc = ""
+    if studentattorney.practice == 'Indigenous Peoples Rights':
+      admin_cc = ""
+    if studentattorney.practice == 'Innocence Clinic':
+      admin_cc = ""
+    if studentattorney.practice == 'Intellectual Property & Entrepeneurship':
+      admin_cc = ""
+  else:
+    admin_cc= ""
   if client.age_in_years() >= 18:
     client.income
   else: 
@@ -343,12 +366,12 @@ code: |
 code: |
   package_filename = space_to_underscore(str(client)+" Case Opening.pdf") 
   email_package = pdf_concatenate(form_to_use, filename=package_filename)
-  email_sent_ok = send_email(to=studentattorney, template=notification,attachments=email_package)
+  email_sent_ok = send_email(to=studentattorney, cc=admin_cc, template=notification,attachments=email_package)
   
 ---
 template: notification
 subject: |
-  ${ client.name } HIPAA Form(s)
+  ${ client.name } Case Opening Form
 content: |
   Greetings, ${ studentattorney.name }!
   
@@ -358,7 +381,7 @@ content: |
 ---
 
 question: |
-  [BR] Here is your Case Opening Packet
+  [BR] Here is your Case Opening Packet for ${ client.name }
 mandatory: True
 attachment:
   variable name: CaseOpen
