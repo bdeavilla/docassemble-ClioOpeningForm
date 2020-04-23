@@ -5,7 +5,7 @@ metadata:
   short title: Case Opening Form
   comment: Opening form for clinical programs
   logo: |
-    <img src="/playgroundstatic/default/4/Suffolk_Logo2.png" style="max-height:2.9em;"/> <h4>Clinical Programs</h4>
+    <img src="/playgroundstatic/default/4/Suffolk_Logo2.png" style="max-height:1.9em;"/>
 ---
 features:
   # This moves the "help" and "back" button next to the Continue button
@@ -18,16 +18,20 @@ features:
   bootstrap theme: https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/darkly/bootstrap.min.css
   progress bar: True
   show progress bar percentage: True
-  progress bar method: stepped
+#  progress bar method: stepped
   css: navbar.css
 ---
 mandatory: True
-code: |
+code: |  
   conflict_description = ""
   conflicts_exist = False
   client.interpretor = False
   opp.interpretor = False
-  enable_AACC: False # Change this to True to enable Administrative Assistant CC'ing
+  enable_AACC = False # Change this to True to enable Administrative Assistant CC'ing
+---
+# scan for variables: False
+mandatory: True
+code: |
   welcome
   studentattorney.name.first
   client.name.first
@@ -89,11 +93,13 @@ code: |
     opp.email = ""
     opp.notes = ""
   contact.gather()
+  judge
   email_sent_ok #This is used to send an email to student attorney and CC the administrative assistant if the feature is turned on
+  email_confirm
 ---
 
 question: |
-  [BR] Would you like to add any relevant contacts for ${ client.name } (e.g. family, witnesses, etc.)?
+  Would you like to add any relevant contacts for ${ client.name } (e.g. family, witnesses, etc.)?
 fields:
   - no label: contact.there_are_any
     datatype: yesnoradio
@@ -103,7 +109,7 @@ fields:
     show if: contact.there_are_any
 ---
 question: |
-  [BR] Please enter the ${ordinal(i)} relevant contact's information below?
+  Please enter the ${ordinal(i)} relevant contact's information below?
 fields:
   - First name: contact[i].name.first
   - Last name: contact[i].name.last
@@ -130,13 +136,13 @@ objects:
 ---
 
 question: |
-  [BR] Suffolk University Law School
+  Suffolk University Law School
 subquestion: |
   This is the Case Opening form for the Clinical Programs at Suffolk University
 field: welcome
 ---
 question: |
-  [BR] Student Attorney Information
+  Student Attorney Information
 fields: 
   - First name: studentattorney.name.first
   - Last name: studentattorney.name.last
@@ -155,9 +161,10 @@ fields:
       - Intellectual Property & Entrepeneurship
       - Juvenile Defenders
   - Supervisor Name: studentattorney.supervisor
+progress: 5
 ---
 question: |
-  [BR] Matter Information
+  Matter Information
 fields: 
   - Judge / ALJ: judge
   - Court / Agency: courthouse
@@ -175,10 +182,10 @@ fields:
       - Full representation
   - Brief Case Synopsis: casesynopsis
     input type: area
-
+progress: 90
 ---
 question: |
-  [BR] Client Contact Information
+  Client Contact Information
 fields:
   - First name: client.name.first
   - Last name: client.name.last
@@ -204,9 +211,10 @@ fields:
     required: False
   - Is this a criminal/delinquent matter?: opp_party
     datatype: noyesradio
+progress: 15
 ---
 question: |
-  [BR] Conflict Check (Must be completed before case will be opened)
+  Conflict Check (Must be completed before case will be opened)
 fields:
   - Did you complete the Conflict Check?: conflict_complete
     datatype: yesnoradio
@@ -216,16 +224,17 @@ fields:
   - Please describe the potential conflicts: conflict_description
     input type: area
     show if: conflicts_exist
+progress: 25
 ---
 question: |
-  [BR] Please sign your name below to approve the case to be opened.
+  Please sign your name below to approve the case to be opened.
 signature: supervisor_signature
 under: |
   ${ studentattorney.supervisor }
-  
+progress: 30
 ---
 question: |
-  [BR] Client Demographic Information
+  Client Demographic Information
 fields:
   - Race/Ethnicity: client.race
     datatype: dropdown
@@ -282,9 +291,10 @@ fields:
   - Additional Notes: client.notes
     required: False
     input type: area
+progress: 50
 ---
 question: |
-  [BR] Client Household Information
+  Client Household Information
 fields:
   - Household Monthly Income: client.income
     datatype: currency
@@ -296,10 +306,10 @@ fields:
   - Number of Dependants: client.dependants
     datatype: integer
     min: 0
-
+progress: 60
 ---
 question: |
-  [BR] Opposing Party Contact Information
+  Opposing Party Contact Information
 fields:
   - First name: opp.name.first
   - Last name: opp.name.last
@@ -355,7 +365,7 @@ fields:
   - Additional Notes: opp.notes
     required: False
     input type: area
-
+progress: 75
 ---
 comment: |
   We can use reconsider here to make sure the selection is updated
@@ -387,9 +397,19 @@ content: |
   
   Have a nice day!  
 ---
-
 question: |
-  [BR] Here is your Case Opening Packet for ${ client.name }
+  E-mail Confirmation
+field: email_confirm
+subquestion: |
+  % if welcome and email_sent_ok:
+  The e-mail was sent successfully to ${ studentattorney.email } and ${ admin_cc } was CC'd.
+  % else:
+  There was a problem sending the e-mail.
+  % endif
+---
+question: |
+  Here is your Case Opening Packet for ${ client.name }
+progress: 100
 mandatory: True
 attachment:
   variable name: CaseOpen
