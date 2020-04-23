@@ -67,6 +67,8 @@ code: |
         admin_cc = ""
     else:
       admin_cc= ""
+  else:
+    admin_cc= ""
   if client.age_in_years() >= 18:
     client.income
   else: 
@@ -94,8 +96,7 @@ code: |
     opp.notes = ""
   contact.gather()
   judge
-  email_sent_ok #This is used to send an email to student attorney and CC the administrative assistant if the feature is turned on
-  email_confirm
+  email_sent_ok
   ending_screen
 ---
 
@@ -371,7 +372,7 @@ progress: 75
 comment: |
   We can use reconsider here to make sure the selection is updated
   if the person uses the back button
-reconsider: True
+# reconsider: True
 code: |
   # Docassemble stops running a code block after variable it's seeking is defined.
   # So we start with a temp variable, and don't define our real variable name
