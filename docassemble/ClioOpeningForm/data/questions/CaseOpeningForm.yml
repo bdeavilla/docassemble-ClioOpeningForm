@@ -96,6 +96,7 @@ code: |
   judge
   email_sent_ok #This is used to send an email to student attorney and CC the administrative assistant if the feature is turned on
   email_confirm
+  ending_screen
 ---
 
 question: |
@@ -401,16 +402,18 @@ question: |
   E-mail Confirmation
 field: email_confirm
 subquestion: |
-  % if welcome and email_sent_ok:
+  % if email_sent_ok:
   The e-mail was sent successfully to ${ studentattorney.email } and ${ admin_cc } was CC'd.
   % else:
   There was a problem sending the e-mail.
   % endif
 ---
+event: ending_screen
 question: |
   Here is your Case Opening Packet for ${ client.name }
+attachment code: form_to_use
 progress: 100
-mandatory: True
+---
 attachment:
   variable name: CaseOpen
   name: Case Opening ${ client.name }
@@ -594,4 +597,3 @@ attachment:
         ${ contact.item(3).address.state } 
     - contact4.zipcode: |
         ${ contact.item(3).address.zip }
-Mandatory: True
