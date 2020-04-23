@@ -16,7 +16,82 @@ features:
   # Or generate your own via https://pikock.github.io/bootstrap-magic/app/index.html#!/editor
  # bootstrap theme: https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/cosmo/bootstrap.min.css
   bootstrap theme: https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/darkly/bootstrap.min.css
+  progress bar: True
+  show progress bar percentage: True
+  progress bar method: stepped
+  css: navbar.css
 ---
+mandatory: True
+code: |
+  conflict_description = ""
+  conflicts_exist = False
+  client.interpretor = False
+  opp.interpretor = False
+  enable_AACC: False # Change this to True to enable Administrative Assistant CC'ing
+  welcome
+  studentattorney.name.first
+  client.name.first
+  conflict_complete
+  if conflict_complete:
+    supervisor_signature
+    case_approval = True
+  else:
+    supervisor_signature = ""
+    case_approval = False
+  client.race
+  if enable_AACC:
+    if case_approval:
+      if studentattorney.practice == 'Juvenile Defenders':
+        admin_cc = "bdeavilla@me.com"
+        # mguirand@suffolk.edu
+      if studentattorney.practice == 'Accelerator Practice':
+        admin_cc = ""
+      if studentattorney.practice == 'Defenders':
+        admin_cc = ""
+        # mguirand@suffolk.edu
+      if studentattorney.practice == 'Family Advocacy':
+        admin_cc = ""
+      if studentattorney.practice == 'Health Law':
+        admin_cc = ""
+      if studentattorney.practice == 'Immigration':
+        admin_cc = ""
+      if studentattorney.practice == 'Indigenous Peoples Rights':
+        admin_cc = ""
+      if studentattorney.practice == 'Innocence Clinic':
+        admin_cc = ""
+      if studentattorney.practice == 'Intellectual Property & Entrepeneurship':
+        admin_cc = ""
+    else:
+      admin_cc= ""
+  if client.age_in_years() >= 18:
+    client.income
+  else: 
+    client.income = "N/A" 
+    client.incomesource = "N/A"
+    client.householdsize = "1"
+    client.dependants = "0"
+  if opp_party:
+    opp.name.first
+  else:
+    opp.name.first = ""
+    opp.name.last = ""
+    opp.gender = ""
+    opp.dob = ""
+    opp.title = ""
+    opp.company = ""
+    opp.aliases = ""
+    opp.address.address = ""
+    opp.address.city = ""
+    opp.address.zip = ""
+    opp.phone = ""
+    opp.alternative = ""
+    opp.language = ""
+    opp.email = ""
+    opp.notes = ""
+  contact.gather()
+  email_sent_ok #This is used to send an email to student attorney and CC the administrative assistant if the feature is turned on
+---
+
 question: |
   [BR] Would you like to add any relevant contacts for ${ client.name } (e.g. family, witnesses, etc.)?
 fields:
@@ -53,74 +128,7 @@ objects:
   - contact: DAList.using(object_type=Individual,ask_number=True)
 
 ---
-mandatory: True
-code: |
-  welcome
-  studentattorney.name.first
-  client.name.first
-  client.race
-  conflict_description = "N/A"
-  conflicts_exist = False
-  client.interpretor = False
-  opp.interpretor = False
-  conflict_complete
-  if conflict_complete:
-    supervisor_signature
-    case_approval = True
-  else:
-    supervisor_signature = ""
-    case_approval = False
-  if case_approval:
-    if studentattorney.practice == 'Juvenile Defenders':
-      admin_cc = ""
-      # mguirand@suffolk.edu
-    if studentattorney.practice == 'Accelerator Practice':
-      admin_cc = ""
-    if studentattorney.practice == 'Defenders':
-      admin_cc = ""
-      # mguirand@suffolk.edu
-    if studentattorney.practice == 'Family Advocacy':
-      admin_cc = ""
-    if studentattorney.practice == 'Health Law':
-      admin_cc = ""
-    if studentattorney.practice == 'Immigration':
-      admin_cc = ""
-    if studentattorney.practice == 'Indigenous Peoples Rights':
-      admin_cc = ""
-    if studentattorney.practice == 'Innocence Clinic':
-      admin_cc = ""
-    if studentattorney.practice == 'Intellectual Property & Entrepeneurship':
-      admin_cc = ""
-  else:
-    admin_cc= ""
-  if client.age_in_years() >= 18:
-    client.income
-  else: 
-    client.income = "N/A" 
-    client.incomesource = "N/A"
-    client.householdsize = "1"
-    client.dependants = "0"
-  if opp_party:
-    opp.name.first
-  else:
-    opp.name.first = ""
-    opp.name.last = ""
-    opp.gender = ""
-    opp.dob = ""
-    opp.title = ""
-    opp.company = ""
-    opp.aliases = ""
-    opp.address.address = ""
-    opp.address.city = ""
-    opp.address.zip = ""
-    opp.phone = ""
-    opp.alternative = ""
-    opp.language = ""
-    opp.email = ""
-    opp.notes = ""
-  contact.gather()
-  email_sent_ok
----
+
 question: |
   [BR] Suffolk University Law School
 subquestion: |
